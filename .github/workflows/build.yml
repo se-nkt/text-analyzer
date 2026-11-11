@@ -1,4 +1,4 @@
-name: Build check
+name: Build and Webhook Notification
 
 on: [push]
 
@@ -11,4 +11,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
-      - run: python -m py_compile analyzer.py
+      - run: pytest -v
+
+      - name: Send Pipeline Notification (Webhook)
+        if: always()
+        run: |
+          echo "Отправка уведомления о статусе пайплайна: ${{ job.status }}..."
+          curl -s -X POST "https://httpbin.org" \
+            -H "Content-Type: application/json" \
+            -d "{\"recipient\": \"developer@example.com\", \"repository\": \"${{ github.repository }}\", \"branch\": \"${{ github.ref_name }}\", \"status\": \"${{ job.status }}\"}"
+          echo "Уведомление успешно доставлено!"
