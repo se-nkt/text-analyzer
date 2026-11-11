@@ -1,6 +1,6 @@
 replicaCount: 2
 image:
-  repository: ВАШ_DOCKER_ID/text-analyzer
+  repository: senkt/text-analyzer
   tag: latest
   pullPolicy: Always
 service:
