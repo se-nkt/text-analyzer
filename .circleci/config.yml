@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install -r requirements.txt
+      - run:
+          name: Run unit tests
+          command: pytest -v
+
+  deploy-heroku:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Deploy to Heroku
+          command: |
+            git push https://heroku:$HEROKU_API_KEY@://heroku.com$HEROKU_APP_NAME.git main
+
+workflows:
+  build-test-deploy:
+    jobs:
+      - build-and-test
+      - deploy-heroku:
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only: main
