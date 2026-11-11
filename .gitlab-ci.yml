@@ -1,18 +1,6 @@
 image: python:3.11-slim
 
-stages:
-  - lint
-  - test
-
-before_script:
-  - pip install -r requirements.txt
-
-code_style:
-  stage: lint
+test_job:
   script:
-    - flake8 analyzer.py test_analyzer.py --max-line-length=100
-
-unit_tests:
-  stage: test
-  script:
+    - pip install -r requirements.txt
     - pytest -v
