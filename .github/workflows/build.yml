@@ -1,23 +1,32 @@
-name: Build and Webhook Notification
+name: CI Pipeline with Security & Code Quality Analysis
 
 on: [push]
 
 jobs:
-  build:
+  test-and-security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
-      - run: pytest -v
 
-      - name: Send Pipeline Notification (Webhook)
-        if: always()
+      - name: Install dependencies and security tools
         run: |
-          echo "Отправка уведомления о статусе пайплайна: ${{ job.status }}..."
-          curl -s -X POST "https://httpbin.org" \
-            -H "Content-Type: application/json" \
-            -d "{\"recipient\": \"developer@example.com\", \"repository\": \"${{ github.repository }}\", \"branch\": \"${{ github.ref_name }}\", \"status\": \"${{ job.status }}\"}"
-          echo "Уведомление успешно доставлено!"
+          pip install -r requirements.txt
+          pip install bandit flake8 pip-audit
+
+      - name: Code Quality Check (Linting)
+        run: flake8 analyzer.py test_analyzer.py --max-line-length=100
+
+      - name: Security SAST Scan (Bandit)
+        run: bandit -r analyzer.py -ll
+
+      - name: Dependency Vulnerability Audit (pip-audit)
+        run: pip-audit
+
+      - name: Run Unit Tests
+        run: pytest -v
