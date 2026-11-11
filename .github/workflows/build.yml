@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies and security tools
         run: |
           pip install -r requirements.txt
-          pip install bandit flake8 pip-audit
+          pip install --upgrade setuptools>=84.1.0 bandit flake8 pip-audit
 
       - name: Code Quality Check (Linting)
         run: flake8 analyzer.py test_analyzer.py --max-line-length=100
