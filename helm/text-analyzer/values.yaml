@@ -1,0 +1,9 @@
+replicaCount: 2
+image:
+  repository: ВАШ_DOCKER_ID/text-analyzer
+  tag: latest
+  pullPolicy: Always
+service:
+  type: NodePort
+  port: 5000
+  nodePort: 30080
