@@ -4,22 +4,25 @@ pipeline {
         DOCKER_IMAGE = "senkt/text-analyzer"
     }
     stages {
-        stage('Test') {
+        stage('Lint') {
+            steps {
+                sh 'flake8 analyzer.py test_analyzer.py --max-line-length=100'
+            }
+        }
+        stage('Unit Tests') {
             steps {
                 sh 'pytest -v'
             }
         }
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE:latest .'
             }
         }
-        stage('Push to Docker Hub') {
+        stage('Deploy') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:latest'
-                }
+                sh 'docker rm -f text-analyzer-prod 2>/dev/null || true'
+                sh 'docker run -d --name text-analyzer-prod -p 5001:5000 $DOCKER_IMAGE:latest'
             }
         }
     }
